@@ -1,0 +1,18 @@
+# Ignore the following Unity files and folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+
+# Ignore auto-generated VS/VSCode project files
+*.csproj
+*.unityproj
+*.sln
+*.userprefs
+
+# Ignore system files
+.DS_Store
+Thumbs.db
