@@ -1,24 +1,56 @@
 using UnityEngine;
-using Mirror; // Only needed if you're using Mirror for multiplayer
+using Mirror;
 
-public class PlayerMove : NetworkBehaviour // Use NetworkBehaviour if using Mirror; otherwise, MonoBehaviour
+public class PlayerMove : NetworkBehaviour
 {
-    public float moveSpeed = 5f; // Speed of the player's movement
+    public float moveSpeed = 5f;
+
+    [SyncVar(hook = nameof(OnColorChanged))]
+    public Color playerColor;
+
+    private SpriteRenderer spriteRenderer;
+
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        OnColorChanged(Color.white, playerColor);
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        playerColor = GetColorByID(connectionToClient.connectionId + 1);
+    }
+
+    private Color GetColorByID(int id)
+    {
+        Color[] colors = { Color.red, Color.green, Color.blue, Color.yellow, Color.magenta, Color.cyan };
+        Color selectedColor = colors[(id - 1) % colors.Length];
+        return new Color(selectedColor.r, selectedColor.g, selectedColor.b, 1f); // Ensure alpha is 1
+    }
+
+    private void OnColorChanged(Color oldColor, Color newColor)
+    {
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = newColor;
+        }
+    }
 
     void Update()
     {
-        // Only allow the local player to control movement (for multiplayer with Mirror)
         if (!isLocalPlayer)
             return;
 
-        // Get input for movement
-        float moveX = Input.GetAxisRaw("Horizontal"); // Left (-1), Right (+1)
-        float moveY = Input.GetAxisRaw("Vertical");   // Down (-1), Up (+1)
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
 
-        // Create a movement vector based on input and speed
         Vector3 movement = new Vector3(moveX, moveY, 0) * moveSpeed * Time.deltaTime;
-
-        // Apply the movement to the Transform's position
         transform.position += movement;
     }
 }
